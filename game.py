@@ -2,6 +2,13 @@ import pygame
 import time
 import random
 
+import cv2
+
+face_cascade = cv2.CascadeClassifier('haarcascade_frontalface_default.xml')
+
+cap = cv2.VideoCapture(0)
+
+
 pygame.init()
 
 display_width = 800
@@ -44,7 +51,28 @@ def message_display(text):
     time.sleep(2)
 
     game_loop()
+
+# nethod to get face boundary
+def getface():
+    ret, img = cap.read()
+    gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
+    faces = face_cascade.detectMultiScale(gray, 1.3, 5)
+    print (faces)
     
+    if len(faces) != 0:
+        face = faces[0]
+        x, y, w, h = face
+        cv2.rectangle(img,(x,y),(x+w,y+h),(255,0,0),2)
+        cv2.imshow('img',img)
+        k = cv2.waitKey(30) & 0xff
+        face_x = x + (w / 2)
+        face_y = y + (h / 2)
+
+        return (face_x, face_y)
+    else:
+        cv2.imshow('img',img)
+        k = cv2.waitKey(30) & 0xff
+        return None
     
 
 def crash():
@@ -71,7 +99,7 @@ def game_loop():
                 pygame.quit()
                 quit()
 
-            if event.type == pygame.KEYDOWN:
+            '''if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_LEFT:
                     x_change = -5
                 if event.key == pygame.K_RIGHT:
@@ -79,10 +107,15 @@ def game_loop():
 
             if event.type == pygame.KEYUP:
                 if event.key == pygame.K_LEFT or event.key == pygame.K_RIGHT:
-                    x_change = 0
+                    x_change = 0'''
 
-        x += x_change
+        #x += x_change
         gameDisplay.fill(white)
+
+        res = getface()
+        if res:
+            x, _ = res
+
 
      ##########
         # things(thingx, thingy, thingw, thingh, color)
